@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<?php 
+include("config.php");
+   session_start();
+
+       $myusername = $_SESSION['login_user'];
+?>
+
+<html lang="en">
+	<head>
+      	<title> Overwatch STATS</title>
+		<meta charset ="utf-8"/>
+		<style type = "text/css">
+	   
+		
+		@font-face {
+			font-family: OverwatchFont;
+			src: url(bignoodletoo.woff);
+			
+			
+		}
+		@font-face {
+			font-family: OverwatchFont2;
+			src: url(koverwatch.tff);
+		}
+		
+		
+		body{
+		
+		margin: 0;
+		padding: 0;
+		font-family: OverwatchFont;
+		font-size: 50pt;
+		color: orange;
+		background-color: black;
+		background: url("background3.jpg");
+		background-size: 1310px 720px;
+		background-repeat: no-repeat;
+		
+		
+		}
+		form {
+		
+		display: inline-block;
+		
+		}	
+		
+		input[type="submit"]
+		{
+		font-family: OverwatchFont;
+		font-size: 21pt;
+		color: 	#FF8C00;
+		}
+		
+		#topofpage
+		{
+		font-family: OverwatchFont;
+		color: darkgrey;
+		margin-top: 60px;	
+		line-height: 0em;	
+		margin-bottom: 50px;
+		}	
+		
+		#homepage
+		{
+			font-size: 25pt;
+			line-height: 0em
+		}
+		
+		tbody{
+			font-size: 14pt;
+			line-height: 1em;
+			color: white;
+		}
+		thead {
+			font-size: 20pt;
+			
+		}
+		table {
+			border-collapse: seperate;
+			border-spacing: 30px 0;
+			margin-left: 0px;
+			margin-right: 244px;
+			margin-bottom: -90px;
+		}
+		td {
+			padding: 10px 0;
+		}
+		
+		#search {
+			margin-left: 564px;
+			margin-top: -32px;
+		}
+		
+			
+		</style>
+    </head>
+	<body>
+	<?php
+	$servername = "localhost";
+	$username = "tphillips2";
+	$password = "tphillips2";
+	$database = "tphillips2DB";
+
+// Create connection
+$conn = mysql_connect($servername,$username,$password);
+
+if (!$conn) {
+	die( 'Could not connect: ' . mysql_error());
+}
+@mysql_selectdb($database) or die( "Unable to open");
+
+$query="SELECT * FROM Hero"; 
+$r=mysql_query($query); 
+if (!$r) {
+	die('Could not connnect: ' . mysql_error());
+}
+
+//while($row = mysql_fetch_array($r)){   //Creates a loop to loop through results
+ //echo $row['HeroName'];  //$row['index'] the index here is a field name
+//}
+?>
+	
+    <?php
+	if(!isset($myusername)) {  //checks if not logged in for log in button
+	?>
+	<div style = "float: right; margin-top: -90px;">
+	<form action="login.php" method="post">
+    <input type="submit" value="Log In" />
+	</form>
+	
+	</div>
+	<?php
+	}
+	?>
+	<?php
+	if(isset($myusername)) {  //checks if logged in for sign out button
+	?>
+	<div style = "float: right; margin-top: -90px;">
+	<form action="logout.php" method="post">
+    <input type="submit" value="Sign Out" />
+	</form>
+	
+	</div>
+	<?php
+	}
+	?>
+	
+	<div id = "topofpage"><center>OVERWATCH STATS</center></div>
+	<div id = "homepage"><center>Home Page</center></div>
+	<center>
+	<form action="heroes.php" method="post"> 
+    <input type="submit" value="Heroes" />
+	</form>
+	<form action="players.php" method="post">
+    <input type="submit" value="Players" />
+	</form>
+	<form action="teams.php" method="post">
+    <input type="submit" value="Teams" />
+	</form>
+	<form action="tournaments.php" method="post">
+    <input type="submit" value="Tournaments" />
+	</form>
+	</center>
+	
+	
+	<div id="search" >
+    <form method="get" action="search.php">
+    <div><center>
+    <input type="text" name="search" id="search-text" value="" />
+    <input type="submit" id="search-submit" value="SEARCH" />
+    </center></div>
+    </form>
+    </div>
+	
+	<?php
+        if(isset($myusername)) //Checks if logged in to post "Followed" table
+        {?>
+        <div style = "font-size: 22pt; font-family: OverwatchFont2; color: white; margin-left: 599px;"> Followed: </div>
+        <div style = "font-size: 20pt; color: orange; margin-left: 622px; margin-bottom: -90px;">
+        <?php
+         
+            $resultFollows = mysql_query("SELECT TeamName FROM `Follows` WHERE UserID=(SELECT ID FROM User WHERE UserName='$myusername')"); 
+    
+          if(isset($myusername)) 
+          {
+            if(mysql_num_rows($resultFollows) > 0)
+            {
+                while($row = mysql_fetch_assoc($resultFollows))
+                {
+                    foreach($row as $cname => $cvalue)
+                    {
+                        print "$cvalue\t";
+                    }
+                    print "\r\n<br>\n";
+                }
+            }
+              else
+            { ?>
+				<div style = "margin-left: -55px; color: white; font-size: 18pt;">
+				<?php
+                print "Not Following Any Teams\t<br>\n";   
+				?>
+				</div>
+				<?php
+            }
+        }
+        }
+
+
+?>
+</div>
+	
+	
+	<div style = "font-size: 22pt; padding-left: 180px; font-family: OverwatchFont2; color: darkgrey; padding-top: 40px" >
+	Recent Tournaments
+	</div>
+	<table style = "float: left; margin-left: 50px;">
+        <thead>
+            <tr>
+                <td>Tournament</td>
+                <td>Starting Date</td>
+				<td>Prize Pool</td>
+				<td>Winner</td>
+
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+           
+        
+            $results = mysql_query("SELECT * FROM Tournament where BeginDate >= '2017/04/01' and BeginDate <= '2017/05/10' ");
+            while($row = mysql_fetch_array($results)) {
+            ?>
+                <tr>
+                    <td><?php echo $row['TournamentName']?></td>
+                    <td><?php echo $row['BeginDate']?></td>
+					<td><?php echo $row['PrizePool']?></td>
+					<td><?php echo $row['Winner']?></td>
+                </tr>
+
+            <?php
+            }
+            ?>
+            </tbody>
+            </table>
+	<table style = "margin-top: -32px;">
+	<caption style = " font-size: 22pt;  font-family: OverwatchFont2; color: darkgrey; "> Top 5 Teams </caption>
+        <thead>
+            <tr>
+                <td>Team</td>
+                <td>Rank</td>
+				<td>Region</td>
+
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+           
+        
+            $results = mysql_query("SELECT * FROM Team ORDER BY Rank LIMIT 5 ");
+            while($row = mysql_fetch_array($results)) {
+            ?>
+                <tr>
+                    <td><?php echo $row['TeamName']?></td>
+                    <td><?php echo $row['Rank']?></td>
+					<td><?php echo $row['Region']?></td>
+                </tr>
+
+            <?php
+            }
+            ?>
+            </tbody>
+            </table>
+			
+			<table style = "margin-top: 0px; margin-left: 48px">
+	<caption style = " font-size: 22pt;  font-family: OverwatchFont2; color: darkgrey; "> Upcoming Tournaments </caption>
+        <thead>
+            <tr>
+                <td>Tournament</td>
+                <td>Starting Date</td>
+				<td>Prize Pool</td>
+				
+
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+           
+        
+            $results = mysql_query("SELECT * FROM Tournament where BeginDate >= '2017/05/09'");
+            while($row = mysql_fetch_array($results)) {
+            ?>
+                <tr>
+                    <td><?php echo $row['TournamentName']?></td>
+                    <td><?php echo $row['BeginDate']?></td>
+					<td><?php echo $row['PrizePool']?></td>
+                </tr>
+
+            <?php
+            }
+            ?>
+            </tbody>
+            </table>
+	
+	</body>
+</html>
